@@ -25,7 +25,7 @@ func JWTAuthInterceptor(secretKey string) grpc.UnaryServerInterceptor {
 
 		authHeader, ok := md["authorization"]
 		if !ok || len(authHeader) == 0 {
-			return nil, status.Error(codes.Unauthenticated, "missing authorization header")
+			return nil, status.Error(codes.Unauthenticated, "missing authorization metadata")
 		}
 
 		tokenStr := strings.TrimPrefix(authHeader[0], "Bearer ")
