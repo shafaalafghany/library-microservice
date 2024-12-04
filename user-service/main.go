@@ -19,6 +19,7 @@ import (
 )
 
 func main() {
+	port := ":3000"
 	logConfig := zap.NewDevelopmentConfig()
 	logConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	logger, err := logConfig.Build()
@@ -42,7 +43,7 @@ func main() {
 	user.RegisterUserServiceServer(server, handler.NewUserHandler(userService, logger))
 	reflection.Register(server)
 
-	listen, err := net.Listen("tcp", ":3000")
+	listen, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -50,4 +51,5 @@ func main() {
 	if err := server.Serve(listen); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+	fmt.Println("listened at ", port)
 }

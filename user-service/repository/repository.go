@@ -8,6 +8,7 @@ import (
 
 type UserRepositoryInterface interface {
 	Create(*model.User) error
+	GetUserByEmail(*model.User) (*model.User, error)
 }
 
 type UserRepository struct {
@@ -28,4 +29,13 @@ func (r *UserRepository) Create(data *model.User) error {
 		return err
 	}
 	return nil
+}
+
+func (r *UserRepository) GetUserByEmail(data *model.User) (*model.User, error) {
+	var user model.User
+	if err := r.db.Where("email = ? AND deleted_at IS NULL", data.Email).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

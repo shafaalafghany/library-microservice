@@ -24,3 +24,7 @@ func NewUserHandler(us service.UserServiceInterface, log *zap.Logger) *UserHandl
 func (h *UserHandler) Register(ctx context.Context, body *user.RegisterRequest) (*user.RegisterResponse, error) {
 	return h.us.Register(ctx, body)
 }
+
+func (h *UserHandler) Login(ctx context.Context, body *user.LoginRequest) (*user.LoginResponse, error) {
+	return h.us.Login(ctx, body)
+}
