@@ -11,6 +11,7 @@ import (
 type AuthorRepositoryInterface interface {
 	Create(*model.Author) error
 	GetById(string) (*model.Author, error)
+	Get(string) ([]*model.Author, error)
 	Update(*model.Author, string) error
 	Delete(string) error
 }
@@ -41,6 +42,21 @@ func (r *AuthorRepository) GetById(id string) (*model.Author, error) {
 	}
 
 	return &author, nil
+}
+
+func (r *AuthorRepository) Get(search string) ([]*model.Author, error) {
+	var authors []*model.Author
+	base := r.db.Model(&model.Author{}).Where("deleted_at IS NULL")
+
+	if search != "" {
+		base.Where("name ILIKE ?", "%"+search+"%")
+	}
+
+	if err := base.Find(&authors).Error; err != nil {
+		return nil, err
+	}
+
+	return authors, nil
 }
 
 func (r *AuthorRepository) Update(data *model.Author, id string) error {

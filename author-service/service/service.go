@@ -19,6 +19,7 @@ import (
 type AuthorServiceInterface interface {
 	CreateAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
 	GetAuthor(context.Context, *author.Author) (*author.Author, error)
+	GetAuthors(context.Context, *author.AuthorRequest) (*author.AuthorsResponse, error)
 	UpdateAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
 	DeleteAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
 }
@@ -84,6 +85,42 @@ func (s *AuthorService) GetAuthor(ctx context.Context, body *author.Author) (*au
 	}
 
 	return res, nil
+}
+
+func (s *AuthorService) GetAuthors(ctx context.Context, body *author.AuthorRequest) (*author.AuthorsResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := s.userService.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	data, err := s.repo.Get(body.Search)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	authors := []*author.Author{}
+
+	if len(data) > 0 {
+		for _, v := range data {
+			temp := &author.Author{
+				Id:        v.ID,
+				Name:      v.Name,
+				CreatedBy: v.CreatedBy,
+				CreatedAt: v.CreatedAt.String(),
+				UpdatedAt: v.UpdatedAt.String(),
+			}
+
+			authors = append(authors, temp)
+		}
+	}
+
+	return &author.AuthorsResponse{Authors: authors}, nil
 }
 
 func (s *AuthorService) UpdateAuthor(ctx context.Context, body *author.Author) (*author.CommonAuthorResponse, error) {
