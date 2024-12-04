@@ -22,6 +22,7 @@ type UserServiceInterface interface {
 	Login(context.Context, *user.LoginRequest) (*user.LoginResponse, error)
 	Get(context.Context, *user.User) (*user.User, error)
 	Update(context.Context, *user.User, string) (*user.CommonUserResponse, error)
+	Delete(context.Context, string) (*user.CommonUserResponse, error)
 }
 
 type UserService struct {
@@ -146,4 +147,21 @@ func (s *UserService) Update(ctx context.Context, body *user.User, id string) (*
 	}
 
 	return &user.CommonUserResponse{Message: "update user successfully"}, nil
+}
+
+func (s *UserService) Delete(ctx context.Context, id string) (*user.CommonUserResponse, error) {
+	existsUser, err := s.repo.GetUserById(&model.User{ID: id})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if existsUser == nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
+	if err := s.repo.DeleteUser(id); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &user.CommonUserResponse{Message: "delete user successfully"}, nil
 }

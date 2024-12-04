@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/shafaalafghany/user-service/model"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -11,6 +13,7 @@ type UserRepositoryInterface interface {
 	GetUserByEmail(*model.User) (*model.User, error)
 	GetUserById(*model.User) (*model.User, error)
 	UpdateUser(*model.User, string) error
+	DeleteUser(string) error
 }
 
 type UserRepository struct {
@@ -58,6 +61,14 @@ func (r *UserRepository) UpdateUser(data *model.User, id string) error {
 	}
 
 	if err := r.db.Model(&model.User{}).Where("id = ?", id).Updates(updatedData).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *UserRepository) DeleteUser(id string) error {
+	if err := r.db.Model(&model.User{}).Where("id = ?", id).Update("deleted_at", time.Now()).Error; err != nil {
 		return err
 	}
 

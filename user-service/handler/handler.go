@@ -65,6 +65,20 @@ func (h *UserHandler) UpdateUser(ctx context.Context, body *user.User) (*user.Co
 	return res, nil
 }
 
+func (h *UserHandler) DeleteUser(ctx context.Context, empty *emptypb.Empty) (*user.CommonUserResponse, error) {
+	userId, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	res, err := h.us.Delete(ctx, userId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return res, nil
+}
+
 func getUserIDFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
