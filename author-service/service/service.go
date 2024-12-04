@@ -19,6 +19,7 @@ import (
 type AuthorServiceInterface interface {
 	CreateAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
 	GetAuthor(context.Context, *author.Author) (*author.Author, error)
+	UpdateAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
 }
 
 type AuthorService struct {
@@ -78,4 +79,29 @@ func (s *AuthorService) GetAuthor(ctx context.Context, body *author.Author) (*au
 	}
 
 	return res, nil
+}
+
+func (s *AuthorService) UpdateAuthor(ctx context.Context, body *author.Author) (*author.CommonAuthorResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := s.userService.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	_, err = s.repo.GetById(body.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	updateData := &model.Author{Name: body.Name}
+	if err := s.repo.Update(updateData, body.Id); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &author.CommonAuthorResponse{Message: "update author successfully"}, nil
 }
