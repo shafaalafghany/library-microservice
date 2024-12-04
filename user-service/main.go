@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/shafaalafghany/user-service/handler"
 	"github.com/shafaalafghany/user-service/middleware"
 	"github.com/shafaalafghany/user-service/model"
@@ -31,11 +32,13 @@ type Config struct {
 }
 
 func main() {
+	_ = godotenv.Load()
+
 	config := Config{
 		JwtSecret:  os.Getenv("SECRET_KEY"),
 		AppPort:    os.Getenv("APP_PORT"),
 		DBHost:     os.Getenv("DB_HOST"),
-		DBPort:     os.Getenv("DB_PASS"),
+		DBPort:     os.Getenv("DB_PORT"),
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASS"),
 		DBName:     os.Getenv("DB_NAME"),
@@ -66,7 +69,7 @@ func main() {
 	user.RegisterUserServiceServer(server, handler.NewUserHandler(userService, logger))
 	reflection.Register(server)
 
-	listen, err := net.Listen("tcp", config.AppPort)
+	listen, err := net.Listen("tcp", ":"+config.AppPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
