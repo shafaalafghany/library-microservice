@@ -20,8 +20,26 @@ import (
 	"gorm.io/gorm"
 )
 
+type Config struct {
+	DBHost     string
+	DBUser     string
+	DBPassword string
+	DBPort     string
+	DBName     string
+	JwtSecret  string
+}
+
 func main() {
+	config := Config{
+		JwtSecret:  os.Getenv("SECRET_KEY"),
+		DBHost:     os.Getenv("DB_HOST"),
+		DBPort:     os.Getenv("DB_PASS"),
+		DBUser:     os.Getenv("DB_USER"),
+		DBPassword: os.Getenv("DB_PASS"),
+		DBName:     os.Getenv("DB_NAME"),
+	}
 	port := ":3000"
+
 	logConfig := zap.NewDevelopmentConfig()
 	logConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	logger, err := logConfig.Build()
@@ -29,7 +47,7 @@ func main() {
 		panic(err)
 	}
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", "localhost", "postgres", "root", "user_master", "5432")
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -42,7 +60,7 @@ func main() {
 	userService := service.NewUserService(userRepo, logger)
 
 	server := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(middleware.JWTAuthInterceptor(os.Getenv("SECRET_KEY"))),
+		grpc.ChainUnaryInterceptor(middleware.JWTAuthInterceptor(config.JwtSecret)),
 	)
 	user.RegisterUserServiceServer(server, handler.NewUserHandler(userService, logger))
 	reflection.Register(server)
