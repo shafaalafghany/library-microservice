@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
 	"github.com/shafaalafghany/user-service/handler"
+	"github.com/shafaalafghany/user-service/middleware"
 	"github.com/shafaalafghany/user-service/model"
 	"github.com/shafaalafghany/user-service/repository"
 	"github.com/shafaalafghany/user-service/service"
@@ -39,7 +41,9 @@ func main() {
 	userRepo := repository.NewUserRepository(db, logger)
 	userService := service.NewUserService(userRepo, logger)
 
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(middleware.JWTAuthInterceptor(os.Getenv("SECRET_KEY"))),
+	)
 	user.RegisterUserServiceServer(server, handler.NewUserHandler(userService, logger))
 	reflection.Register(server)
 

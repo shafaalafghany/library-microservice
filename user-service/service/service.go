@@ -20,6 +20,7 @@ import (
 type UserServiceInterface interface {
 	Register(context.Context, *user.RegisterRequest) (*user.RegisterResponse, error)
 	Login(context.Context, *user.LoginRequest) (*user.LoginResponse, error)
+	GetUser(context.Context, *user.User) (*user.User, error)
 }
 
 type UserService struct {
@@ -99,4 +100,27 @@ func (s *UserService) Login(ctx context.Context, body *user.LoginRequest) (*user
 	}
 
 	return res, nil
+}
+
+func (s *UserService) GetUser(ctx context.Context, body *user.User) (*user.User, error) {
+	existsUser, err := s.repo.GetUserById(&model.User{ID: body.Id})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if existsUser == nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
+	existsUser.Password = ""
+
+	userData := &user.User{
+		Id:        existsUser.ID,
+		Email:     existsUser.Email,
+		Name:      existsUser.Name,
+		CreatedAt: existsUser.CreatedAt.String(),
+		UpdatedAt: existsUser.UpdatedAt.String(),
+	}
+
+	return userData, nil
 }

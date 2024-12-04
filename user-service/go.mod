@@ -4,7 +4,7 @@ go 1.23.3
 
 require (
 	github.com/google/uuid v1.6.0
-	gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241203231514-71c73087f0d9
+	gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241204091207-689e1723ae55
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.29.0
 	google.golang.org/grpc v1.68.0

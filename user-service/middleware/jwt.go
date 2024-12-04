@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
@@ -15,7 +14,6 @@ import (
 
 func JWTAuthInterceptor(secretKey string) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-		fmt.Println(info.FullMethod)
 		if info.FullMethod == "/user.UserService/Register" || info.FullMethod == "/user.UserService/Login" {
 			return handler(ctx, req)
 		}
