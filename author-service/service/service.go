@@ -20,6 +20,7 @@ type AuthorServiceInterface interface {
 	CreateAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
 	GetAuthor(context.Context, *author.Author) (*author.Author, error)
 	UpdateAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
+	DeleteAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
 }
 
 type AuthorService struct {
@@ -65,6 +66,10 @@ func (s *AuthorService) CreateAuthor(ctx context.Context, body *author.Author) (
 }
 
 func (s *AuthorService) GetAuthor(ctx context.Context, body *author.Author) (*author.Author, error) {
+	if body.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id cannot be empty")
+	}
+
 	data, err := s.repo.GetById(body.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -82,6 +87,10 @@ func (s *AuthorService) GetAuthor(ctx context.Context, body *author.Author) (*au
 }
 
 func (s *AuthorService) UpdateAuthor(ctx context.Context, body *author.Author) (*author.CommonAuthorResponse, error) {
+	if body.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id cannot be empty")
+	}
+
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Error(codes.Internal, "missing outgoing metadata")
@@ -104,4 +113,32 @@ func (s *AuthorService) UpdateAuthor(ctx context.Context, body *author.Author) (
 	}
 
 	return &author.CommonAuthorResponse{Message: "update author successfully"}, nil
+}
+
+func (s *AuthorService) DeleteAuthor(ctx context.Context, body *author.Author) (*author.CommonAuthorResponse, error) {
+	if body.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id cannot be empty")
+	}
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := s.userService.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	_, err = s.repo.GetById(body.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if err := s.repo.Delete(body.Id); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &author.CommonAuthorResponse{Message: "delete author successfully"}, nil
 }

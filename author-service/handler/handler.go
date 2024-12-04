@@ -52,6 +52,15 @@ func (h *AuthorHandler) Update(ctx context.Context, body *author.Author) (*autho
 	return h.as.UpdateAuthor(ctx, body)
 }
 
+func (h *AuthorHandler) Delete(ctx context.Context, body *author.Author) (*author.CommonAuthorResponse, error) {
+	_, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	return h.as.DeleteAuthor(ctx, body)
+}
+
 func getUserIDFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
