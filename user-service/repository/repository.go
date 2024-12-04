@@ -10,6 +10,7 @@ type UserRepositoryInterface interface {
 	Create(*model.User) error
 	GetUserByEmail(*model.User) (*model.User, error)
 	GetUserById(*model.User) (*model.User, error)
+	UpdateUser(*model.User, string) error
 }
 
 type UserRepository struct {
@@ -48,4 +49,17 @@ func (r *UserRepository) GetUserById(data *model.User) (*model.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (r *UserRepository) UpdateUser(data *model.User, id string) error {
+	updatedData := map[string]interface{}{
+		"name":  data.Name,
+		"email": data.Email,
+	}
+
+	if err := r.db.Model(&model.User{}).Where("id = ?", id).Updates(updatedData).Error; err != nil {
+		return err
+	}
+
+	return nil
 }

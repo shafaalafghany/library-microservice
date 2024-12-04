@@ -53,6 +53,8 @@ gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241203231514-71c73087f0d9 h1:D
 gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241203231514-71c73087f0d9/go.mod h1:lkdeiv72fIM/G+qkjsdQghhePqd5a8KO0FoQKDRlVK4=
 gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241204091207-689e1723ae55 h1:tdou+v6xy6ZS2HwmdkzsfpeqTpnV3ZCZ/hyvDPjC65s=
 gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241204091207-689e1723ae55/go.mod h1:lkdeiv72fIM/G+qkjsdQghhePqd5a8KO0FoQKDRlVK4=
+gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241204092424-c8dccd5451ca h1:X+aIHLBm/hyti2/iqqP3/mlVfItxiBtPGiYafAj8OOQ=
+gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241204092424-c8dccd5451ca/go.mod h1:lkdeiv72fIM/G+qkjsdQghhePqd5a8KO0FoQKDRlVK4=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
 go.uber.org/multierr v1.10.0 h1:S0h4aNzvfcFsC3dRF1jLoaov7oRaKqRGC/pUEJ2yvPQ=

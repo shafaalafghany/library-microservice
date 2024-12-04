@@ -43,12 +43,26 @@ func (h *UserHandler) GetUser(ctx context.Context, empty *emptypb.Empty) (*user.
 		return nil, status.Error(codes.PermissionDenied, err.Error())
 	}
 
-	user, err := h.us.GetUser(ctx, &user.User{Id: userId})
+	user, err := h.us.Get(ctx, &user.User{Id: userId})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return user, nil
+}
+
+func (h *UserHandler) UpdateUser(ctx context.Context, body *user.User) (*user.CommonUserResponse, error) {
+	userId, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	res, err := h.us.Update(ctx, body, userId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return res, nil
 }
 
 func getUserIDFromContext(ctx context.Context) (string, error) {
