@@ -27,18 +27,20 @@ type Config struct {
 	DBPort     string
 	DBName     string
 	JwtSecret  string
+	AppPort    string
 }
 
 func main() {
 	config := Config{
 		JwtSecret:  os.Getenv("SECRET_KEY"),
+		AppPort:    os.Getenv("APP_PORT"),
 		DBHost:     os.Getenv("DB_HOST"),
 		DBPort:     os.Getenv("DB_PASS"),
 		DBUser:     os.Getenv("DB_USER"),
 		DBPassword: os.Getenv("DB_PASS"),
 		DBName:     os.Getenv("DB_NAME"),
 	}
-	port := ":3000"
+	config.AppPort = ":3000"
 
 	logConfig := zap.NewDevelopmentConfig()
 	logConfig.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
@@ -65,7 +67,7 @@ func main() {
 	user.RegisterUserServiceServer(server, handler.NewUserHandler(userService, logger))
 	reflection.Register(server)
 
-	listen, err := net.Listen("tcp", port)
+	listen, err := net.Listen("tcp", config.AppPort)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -73,5 +75,5 @@ func main() {
 	if err := server.Serve(listen); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-	fmt.Println("listened at ", port)
+	fmt.Println("listened at ", config.AppPort)
 }
