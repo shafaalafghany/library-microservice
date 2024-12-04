@@ -18,6 +18,7 @@ import (
 
 type AuthorServiceInterface interface {
 	CreateAuthor(context.Context, *author.Author) (*author.CommonAuthorResponse, error)
+	GetAuthor(context.Context, *author.Author) (*author.Author, error)
 }
 
 type AuthorService struct {
@@ -60,4 +61,21 @@ func (s *AuthorService) CreateAuthor(ctx context.Context, body *author.Author) (
 	response := fmt.Sprintf("create new author successfully with id %v", id)
 
 	return &author.CommonAuthorResponse{Message: response}, nil
+}
+
+func (s *AuthorService) GetAuthor(ctx context.Context, body *author.Author) (*author.Author, error) {
+	data, err := s.repo.GetById(body.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	res := &author.Author{
+		Id:        data.ID,
+		Name:      data.Name,
+		CreatedBy: data.CreatedBy,
+		CreatedAt: data.CreatedAt.String(),
+		UpdatedAt: data.UpdatedAt.String(),
+	}
+
+	return res, nil
 }

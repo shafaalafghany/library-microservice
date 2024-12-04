@@ -39,6 +39,10 @@ func (h *AuthorHandler) Create(ctx context.Context, body *author.Author) (*autho
 	return h.as.CreateAuthor(ctx, body)
 }
 
+func (h *AuthorHandler) Get(ctx context.Context, body *author.Author) (*author.Author, error) {
+	return h.as.GetAuthor(ctx, body)
+}
+
 func getUserIDFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

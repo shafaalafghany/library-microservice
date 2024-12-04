@@ -8,6 +8,7 @@ import (
 
 type AuthorRepositoryInterface interface {
 	Create(*model.Author) error
+	GetById(string) (*model.Author, error)
 }
 
 type AuthorRepository struct {
@@ -27,4 +28,13 @@ func (r *AuthorRepository) Create(data *model.Author) error {
 		return err
 	}
 	return nil
+}
+
+func (r *AuthorRepository) GetById(id string) (*model.Author, error) {
+	var author model.Author
+	if err := r.db.Where("id = ? AND deleted_at IS NULL", id).First(&author).Error; err != nil {
+		return nil, err
+	}
+
+	return &author, nil
 }
