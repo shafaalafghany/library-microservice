@@ -19,6 +19,7 @@ import (
 type CategoryServiceInterface interface {
 	CreateCategory(context.Context, *category.Category) (*category.CommonCategoryResponse, error)
 	GetCategory(context.Context, *category.Category) (*category.Category, error)
+	GetCategories(context.Context, *category.CategoryRequest) (*category.CategoriesResponse, error)
 }
 
 type CategoryService struct {
@@ -86,4 +87,40 @@ func (cs *CategoryService) GetCategory(ctx context.Context, body *category.Categ
 	body.UpdatedAt = data.UpdatedAt.String()
 
 	return body, nil
+}
+
+func (cs *CategoryService) GetCategories(ctx context.Context, body *category.CategoryRequest) (*category.CategoriesResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := cs.userService.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	data, err := cs.repo.Get(body.GetSearch())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	categories := []*category.Category{}
+
+	if len(data) > 0 {
+		for _, v := range data {
+			temp := &category.Category{
+				Id:        v.ID,
+				Name:      v.Name,
+				CreatedBy: v.CreatedBy,
+				CreatedAt: v.CreatedAt.String(),
+				UpdatedAt: v.UpdatedAt.String(),
+			}
+
+			categories = append(categories, temp)
+		}
+	}
+
+	return &category.CategoriesResponse{Categories: categories}, nil
 }

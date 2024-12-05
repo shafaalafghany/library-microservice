@@ -9,6 +9,7 @@ import (
 type CategoryRepositoryInterface interface {
 	Create(*model.Category) error
 	GetById(string) (*model.Category, error)
+	Get(string) ([]*model.Category, error)
 }
 
 type CategoryRepository struct {
@@ -37,4 +38,19 @@ func (cr *CategoryRepository) GetById(id string) (*model.Category, error) {
 	}
 
 	return &category, nil
+}
+
+func (cr *CategoryRepository) Get(search string) ([]*model.Category, error) {
+	var categories []*model.Category
+	base := cr.db.Model(&model.Category{}).Where("deleted_at IS NULL")
+
+	if search != "" {
+		base.Where("name ILIKE ?", "%"+search+"%")
+	}
+
+	if err := base.Find(&categories).Error; err != nil {
+		return nil, err
+	}
+
+	return categories, nil
 }
