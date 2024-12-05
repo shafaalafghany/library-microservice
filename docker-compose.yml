@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  user-service:
+    image: shafaalafghany/user-service:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - APP_PORT=3000
+      - SECRET_KEY=example
+      - DB_HOST=postgres-user
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=root
+      - DB_NAME=user_master
+    depends_on:
+      - postgres-user
+
+  author-service:
+    image: shafaalafghany/author-service:latest
+    ports:
+      - "4000:4000"
+    environment:
+      - APP_PORT=4000
+      - SECRET_KEY=example
+      - DB_HOST=postgres-author
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=root
+      - DB_NAME=author_master
+      - USER_SERVICE=user-service:3000
+    depends_on:
+      - postgres-author
+      - user-service
+
+  category-service:
+    image: shafaalafghany/category-service:latest
+    ports:
+      - "5000:5000"
+    environment:
+      - APP_PORT=5000
+      - SECRET_KEY=example
+      - DB_HOST=postgres-category
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=root
+      - DB_NAME=category_master
+      - USER_SERVICE=user-service:3000
+    depends_on:
+      - postgres-category
+      - user-service
+
+  book-service:
+    image: shafaalafghany/book-service:latest
+    ports:
+      - "6000:6000"
+    environment:
+      - APP_PORT=6000
+      - SECRET_KEY=example
+      - DB_HOST=postgres-book
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=root
+      - DB_NAME=book_master
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - USER_SERVICE=user-service:3000
+      - AUTHOR_SERVICE=author-service:4000
+      - CATEGORY_SERVICE=category-service:5000
+    depends_on:
+      - postgres-book
+      - user-service
+      - author-service
+      - category-service
+      - redis
+
+  postgres-user:
+    image: postgres:17.1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=user_master
+    volumes:
+      - postgres-user-data:/var/lib/postgresql/data
+      - ./init-userdb.sh:/docker-entrypoint-initdb.d/init-userdb.sh
+
+  postgres-author:
+    image: postgres:17.1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=author_master
+    volumes:
+      - postgres-author-data:/var/lib/postgresql/data
+      - ./init-authordb.sh:/docker-entrypoint-initdb.d/init-authordb.sh
+
+  postgres-category:
+    image: postgres:17.1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=category_master
+    volumes:
+      - postgres-category-data:/var/lib/postgresql/data
+      - ./init-categorydb.sh:/docker-entrypoint-initdb.d/init-categorydb.sh
+
+  postgres-book:
+    image: postgres:17.1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=book_master
+    volumes:
+      - postgres-book-data:/var/lib/postgresql/data
+      - ./init-bookdb.sh:/docker-entrypoint-initdb.d/init-bookdb.sh
+
+  redis:
+    image: redis:8
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  postgres-user-data:
+  postgres-author-data:
+  postgres-category-data:
+  postgres-book-data:
+  redis-data:
