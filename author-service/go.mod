@@ -5,7 +5,7 @@ go 1.23.3
 require (
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
-	gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241204132119-e84226bcd2fc
+	gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241205053026-688a6a363e09
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.68.0
 	gorm.io/driver/postgres v1.5.11

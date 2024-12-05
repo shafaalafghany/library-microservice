@@ -53,6 +53,8 @@ github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKs
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241204092424-c8dccd5451ca h1:X+aIHLBm/hyti2/iqqP3/mlVfItxiBtPGiYafAj8OOQ=
 gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241204092424-c8dccd5451ca/go.mod h1:lkdeiv72fIM/G+qkjsdQghhePqd5a8KO0FoQKDRlVK4=
+gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241205053026-688a6a363e09 h1:g+iZo1L0LT+U/IzdWye7o6iSB+ExnadlBoFNz6EQMPA=
+gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241205053026-688a6a363e09/go.mod h1:lkdeiv72fIM/G+qkjsdQghhePqd5a8KO0FoQKDRlVK4=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
 go.uber.org/goleak v1.3.0/go.mod h1:CoHD4mav9JJNrW/WLlf7HGZPjdw8EucARQHekz1X6bE=
 go.uber.org/multierr v1.10.0 h1:S0h4aNzvfcFsC3dRF1jLoaov7oRaKqRGC/pUEJ2yvPQ=
