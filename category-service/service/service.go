@@ -18,6 +18,7 @@ import (
 
 type CategoryServiceInterface interface {
 	CreateCategory(context.Context, *category.Category) (*category.CommonCategoryResponse, error)
+	GetCategory(context.Context, *category.Category) (*category.Category, error)
 }
 
 type CategoryService struct {
@@ -60,4 +61,29 @@ func (cs *CategoryService) CreateCategory(ctx context.Context, body *category.Ca
 	response := fmt.Sprintf("create new category %s successfully with id %v", body.GetName(), id)
 
 	return &category.CommonCategoryResponse{Message: response}, nil
+}
+
+func (cs *CategoryService) GetCategory(ctx context.Context, body *category.Category) (*category.Category, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := cs.userService.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	data, err := cs.repo.GetById(body.GetId())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	body.Name = data.Name
+	body.CreatedBy = data.CreatedBy
+	body.CreatedAt = data.CreatedAt.String()
+	body.UpdatedAt = data.UpdatedAt.String()
+
+	return body, nil
 }

@@ -8,6 +8,7 @@ import (
 
 type CategoryRepositoryInterface interface {
 	Create(*model.Category) error
+	GetById(string) (*model.Category, error)
 }
 
 type CategoryRepository struct {
@@ -27,4 +28,13 @@ func (cr *CategoryRepository) Create(data *model.Category) error {
 		return err
 	}
 	return nil
+}
+
+func (cr *CategoryRepository) GetById(id string) (*model.Category, error) {
+	var category model.Category
+	if err := cr.db.Where("id = ? AND deleted_at IS NULL", id).First(&category).Error; err != nil {
+		return nil, err
+	}
+
+	return &category, nil
 }

@@ -39,6 +39,15 @@ func (ch *CategoryHandler) Create(ctx context.Context, body *category.Category) 
 	return ch.cs.CreateCategory(ctx, body)
 }
 
+func (ch *CategoryHandler) Get(ctx context.Context, body *category.Category) (*category.Category, error) {
+	_, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	return ch.cs.GetCategory(ctx, body)
+}
+
 func getUserIDFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
