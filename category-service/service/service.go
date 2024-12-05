@@ -20,6 +20,8 @@ type CategoryServiceInterface interface {
 	CreateCategory(context.Context, *category.Category) (*category.CommonCategoryResponse, error)
 	GetCategory(context.Context, *category.Category) (*category.Category, error)
 	GetCategories(context.Context, *category.CategoryRequest) (*category.CategoriesResponse, error)
+	UpdateCategory(context.Context, *category.Category) (*category.CommonCategoryResponse, error)
+	DeleteCategory(context.Context, *category.Category) (*category.CommonCategoryResponse, error)
 }
 
 type CategoryService struct {
@@ -65,6 +67,10 @@ func (cs *CategoryService) CreateCategory(ctx context.Context, body *category.Ca
 }
 
 func (cs *CategoryService) GetCategory(ctx context.Context, body *category.Category) (*category.Category, error) {
+	if body.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id cannot be empty")
+	}
+
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		return nil, status.Error(codes.Internal, "missing outgoing metadata")
@@ -123,4 +129,61 @@ func (cs *CategoryService) GetCategories(ctx context.Context, body *category.Cat
 	}
 
 	return &category.CategoriesResponse{Categories: categories}, nil
+}
+
+func (cs *CategoryService) UpdateCategory(ctx context.Context, body *category.Category) (*category.CommonCategoryResponse, error) {
+	if body.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id cannot be empty")
+	}
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := cs.userService.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	_, err = cs.repo.GetById(body.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	updateData := &model.Category{Name: body.GetName()}
+	if err := cs.repo.Update(updateData, body.GetId()); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &category.CommonCategoryResponse{Message: "update category successfully"}, nil
+}
+
+func (cs *CategoryService) DeleteCategory(ctx context.Context, body *category.Category) (*category.CommonCategoryResponse, error) {
+	if body.Id == "" {
+		return nil, status.Error(codes.InvalidArgument, "id cannot be empty")
+	}
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := cs.userService.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	_, err = cs.repo.GetById(body.GetId())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if err := cs.repo.Delete(body.GetId()); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &category.CommonCategoryResponse{Message: "delete category successfully"}, nil
 }

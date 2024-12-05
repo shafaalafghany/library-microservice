@@ -57,6 +57,23 @@ func (ch *CategoryHandler) GetList(ctx context.Context, body *category.CategoryR
 	return ch.cs.GetCategories(ctx, body)
 }
 
+func (ch *CategoryHandler) Update(ctx context.Context, body *category.Category) (*category.CommonCategoryResponse, error) {
+	_, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	return ch.cs.UpdateCategory(ctx, body)
+}
+func (ch *CategoryHandler) Delete(ctx context.Context, body *category.Category) (*category.CommonCategoryResponse, error) {
+	_, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	return ch.cs.DeleteCategory(ctx, body)
+}
+
 func getUserIDFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

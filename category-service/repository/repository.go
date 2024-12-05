@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/shafaalafghany/category-service/model"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -10,6 +12,8 @@ type CategoryRepositoryInterface interface {
 	Create(*model.Category) error
 	GetById(string) (*model.Category, error)
 	Get(string) ([]*model.Category, error)
+	Update(*model.Category, string) error
+	Delete(string) error
 }
 
 type CategoryRepository struct {
@@ -53,4 +57,20 @@ func (cr *CategoryRepository) Get(search string) ([]*model.Category, error) {
 	}
 
 	return categories, nil
+}
+
+func (cr *CategoryRepository) Update(data *model.Category, id string) error {
+	if err := cr.db.Model(&model.Category{}).
+		Where("id = ? AND deleted_at IS NULL", id).
+		Update("name", data.Name).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (cr *CategoryRepository) Delete(id string) error {
+	if err := cr.db.Model(&model.Category{}).Where("id = ? AND deleted_at IS NULL", id).Update("deleted_at", time.Now()).Error; err != nil {
+		return err
+	}
+	return nil
 }
