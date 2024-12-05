@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package category;
+option go_package = "go/category";
+
+service CategoryService {
+  rpc Create(Category) returns (CommonCategoryResponse);
+  rpc Get(Category) returns (Category);
+  rpc GetList(CategoryRequest) returns (CategoriesResponse);
+  rpc Update(Category) returns (CommonCategoryResponse);
+  rpc Delete(Category) returns (CommonCategoryResponse);
+}
+
+message Category {
+  string id = 1;
+  string name = 2;
+  string created_by = 3;
+  string created_at = 4;
+  string updated_at = 5;
+  string deleted_at = 6;
+}
+
+message CategoriesResponse {
+  repeated Category categories = 1;
+}
+
+message CategoryRequest {
+  string search = 1;
+}
+
+message CommonCategoryResponse {
+  string message = 1;
+}

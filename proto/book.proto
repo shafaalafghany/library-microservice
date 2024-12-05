@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package book;
+option go_package = "go/book";
+
+
+service BookService {
+  rpc Create(Book) returns (CommonBookResponse);
+  rpc Get(Book) returns (Book);
+  rpc Getlist(BookRequest) returns (BooksResponse);
+  rpc Update(Book) returns (CommonBookResponse);
+  rpc Delete(Book) returns (CommonBookResponse);
+
+  rpc BorrowBook(BorrowRecord) returns (CommonBorrowRecordResponse);
+  rpc ReturnBook(BorrowRecord) returns (CommonBorrowRecordResponse);
+}
+
+message Book {
+  string id = 1;
+  string name = 2;
+  string author_id = 3;
+  string category_id = 4;
+  bool is_borrowed = 5;
+  int32 borrows = 6;
+  string created_by = 7;
+  string created_at = 8;
+  string updated_at = 9;
+  string deleted_at = 10;
+}
+
+message CommonBookResponse {
+  string message = 1;
+}
+
+message BooksResponse {
+  repeated Book books = 1;
+}
+
+message BookRequest {
+  string search = 1;
+}
+
+message BorrowRecord {
+  string id = 1;
+  string book_id = 2;
+  string user_id = 3;
+  string borrowed_at = 4;
+  string returned_at = 5;
+  string created_at = 6;
+  string updated_at = 7;
+  string deleted_at = 8;
+}
+
+message CommonBorrowRecordResponse {
+  string message = 1;
+}

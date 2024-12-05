@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package author;
+option go_package = "go/author";
+
+service AuthorService {
+  rpc Create(Author) returns (CommonAuthorResponse);
+  rpc Get(Author) returns (Author);
+  rpc GetList(AuthorRequest) returns (AuthorsResponse);
+  rpc Update(Author) returns (CommonAuthorResponse);
+  rpc Delete(Author) returns (CommonAuthorResponse);
+}
+
+message Author {
+  string id = 1;
+  string name = 2;
+  string created_by = 3;
+  string created_at = 4;
+  string updated_at = 5;
+  string deleted_at = 6;
+}
+
+message AuthorsResponse {
+  repeated Author authors = 1;
+}
+
+message AuthorRequest {
+  string search = 1;
+}
+
+message CommonAuthorResponse {
+  string message = 1;
+}

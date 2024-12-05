@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package user;
+option go_package = "go/user";
+
+import "google/protobuf/empty.proto";
+
+service UserService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc GetUser(google.protobuf.Empty) returns (User);
+  rpc UpdateUser(User) returns (CommonUserResponse);
+  rpc DeleteUser(google.protobuf.Empty) returns (CommonUserResponse);
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string password = 4;
+  string created_at = 5;
+  string updated_at = 6;
+  string deleted_at = 7;
+}
+
+message RegisterRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message RegisterResponse {
+  string message = 1;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  User user = 1;
+  string token = 2;
+}
+
+message CommonUserResponse {
+  string message = 1;
+}
