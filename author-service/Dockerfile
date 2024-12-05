@@ -1,12 +1,14 @@
 # Stage 1: Build stage
 FROM golang:1.23.3-alpine AS builder
 WORKDIR /app
-COPY . .
+COPY go.mod go.sum ./
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o main .
+COPY . .
+RUN go build -o author-service .
 
 # Stage 2: Runtime stage
 FROM alpine:latest
-WORKDIR /app
-COPY --from=builder /app/main .
-CMD ["./main"]
+WORKDIR /root/
+COPY --from=builder /app/author-service .
+EXPOSE 4000
+CMD ["./author-service"]

@@ -9,7 +9,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/pgx/v5 v5.5.5 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
-	gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241205053026-688a6a363e09 // indirect
+	gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241205181320-ad4a6cf44a81 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
 	golang.org/x/net v0.29.0 // indirect
