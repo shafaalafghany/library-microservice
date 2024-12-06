@@ -65,6 +65,24 @@ func (h *BookHandler) Delete(ctx context.Context, body *book.Book) (*book.Common
 	return h.s.DeleteBook(ctx, body)
 }
 
+func (h *BookHandler) BorrowBook(ctx context.Context, body *book.BorrowRecord) (*book.CommonBorrowRecordResponse, error) {
+	_, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	return h.s.BorrowBook(ctx, body)
+}
+
+func (h *BookHandler) ReturnBook(ctx context.Context, body *book.BorrowRecord) (*book.CommonBorrowRecordResponse, error) {
+	_, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	return h.s.ReturnBook(ctx, body)
+}
+
 func getUserIDFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

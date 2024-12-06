@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/shafaalafghany/book-service/model"
@@ -24,6 +25,9 @@ type BookServiceInterface interface {
 	GetBooks(context.Context, *book.BookRequest) (*book.BooksResponse, error)
 	UpdateBook(context.Context, *book.Book) (*book.CommonBookResponse, error)
 	DeleteBook(context.Context, *book.Book) (*book.CommonBookResponse, error)
+
+	BorrowBook(context.Context, *book.BorrowRecord) (*book.CommonBorrowRecordResponse, error)
+	ReturnBook(context.Context, *book.BorrowRecord) (*book.CommonBorrowRecordResponse, error)
 }
 
 type BookService struct {
@@ -209,4 +213,62 @@ func (s *BookService) DeleteBook(ctx context.Context, body *book.Book) (*book.Co
 	}
 
 	return &book.CommonBookResponse{Message: "delete book successfully"}, nil
+}
+
+func (s *BookService) BorrowBook(ctx context.Context, body *book.BorrowRecord) (*book.CommonBorrowRecordResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := s.userSvc.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "invalid user")
+	}
+
+	if _, err = s.repo.GetById(ctx, &model.Book{ID: body.GetBookId()}); err != nil {
+		return nil, status.Error(codes.NotFound, "book not found")
+	}
+
+	borrowRecord := &model.BorrowRecord{
+		ID:         uuid.NewString(),
+		BookID:     body.GetBookId(),
+		UserID:     body.GetUserId(),
+		BorrowedAt: time.Now(),
+	}
+
+	if err = s.repo.Borrow(ctx, borrowRecord); err != nil {
+		return nil, err
+	}
+
+	return &book.CommonBorrowRecordResponse{Message: "borrow book successfully"}, nil
+}
+
+func (s *BookService) ReturnBook(ctx context.Context, body *book.BorrowRecord) (*book.CommonBorrowRecordResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := s.userSvc.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "invalid user")
+	}
+
+	if _, err = s.repo.GetById(ctx, &model.Book{ID: body.GetBookId()}); err != nil {
+		return nil, status.Error(codes.NotFound, "book not found")
+	}
+
+	borrowRecord := &model.BorrowRecord{
+		BookID: body.GetBookId(),
+		UserID: body.GetUserId(),
+	}
+
+	if err = s.repo.ReturnBook(ctx, borrowRecord); err != nil {
+		return nil, err
+	}
+
+	return &book.CommonBorrowRecordResponse{Message: "return book successfully"}, nil
 }

@@ -12,7 +12,7 @@ type BorrowRecord struct {
 	BookID     string     `gorm:"not null;index"`
 	UserID     string     `gorm:"not null;index"`
 	BorrowedAt time.Time  `gorm:"not null"`
-	ReturnedAt *time.Time `gorm:"not null"`
+	ReturnedAt *time.Time `gorm:""`
 	CreatedAt  time.Time  `gorm:"autoCreateTime"`
 	UpdatedAt  time.Time  `gorm:"autoUpdateTime"`
 	DeletedAt  *time.Time `gorm:"index"`

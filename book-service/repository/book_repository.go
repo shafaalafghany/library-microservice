@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/shafaalafghany/book-service/model"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type BookRepositoryInterface interface {
@@ -18,6 +20,8 @@ type BookRepositoryInterface interface {
 	Get(context.Context, string) ([]*model.Book, error)
 	Update(context.Context, *model.Book, string) error
 	Delete(context.Context, string) error
+	Borrow(context.Context, *model.BorrowRecord) error
+	ReturnBook(context.Context, *model.BorrowRecord) error
 }
 
 type BookRepository struct {
@@ -170,6 +174,79 @@ func (r *BookRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	if err := r.db.Model(&model.Book{}).Where("id = ? AND deleted_at IS NULL", id).Update("deleted_at", time.Now()).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *BookRepository) Borrow(ctx context.Context, data *model.BorrowRecord) error {
+	lockKey := fmt.Sprintf("lock:book:%s", data.BookID)
+	if ok := r.redis.SetNX(ctx, lockKey, data.UserID, 30*time.Second).Val(); !ok {
+		return fmt.Errorf("book currently is still borrowed, try again later")
+	}
+	defer r.redis.Del(ctx, lockKey)
+
+	var book model.Book
+	if err := r.db.Clauses(clause.Locking{Strength: "UPDATE"}).
+		First(&book, "id = ? AND deleted_at IS NULL", data.BookID).Error; err != nil {
+		return err
+	}
+
+	if book.IsBorrowed {
+		return errors.New("book is still borrowed")
+	}
+
+	if err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&data).Error; err != nil {
+			return err
+		}
+
+		book.IsBorrowed = true
+		book.Borrows++
+		if err := tx.Save(&book).Error; err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *BookRepository) ReturnBook(ctx context.Context, data *model.BorrowRecord) error {
+	var book model.Book
+	if err := r.db.Clauses(clause.Locking{Strength: "UPDATE"}).
+		First(&book, "id = ? AND deleted_at IS NULL", data.BookID).Error; err != nil {
+		return err
+	}
+
+	if !book.IsBorrowed {
+		return errors.New("book is not borrowed")
+	}
+
+	var borrowRecord model.BorrowRecord
+	if err := r.db.First(&borrowRecord, "book_id = ? AND user_id = ? AND returned_at IS NULL", data.BookID, data.UserID).Error; err != nil {
+		return err
+	}
+
+	now := time.Now()
+	borrowRecord.ReturnedAt = &now
+
+	if err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(&borrowRecord).Error; err != nil {
+			return err
+		}
+
+		book.IsBorrowed = false
+		if err := tx.Save(&book).Error; err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
 		return err
 	}
 
