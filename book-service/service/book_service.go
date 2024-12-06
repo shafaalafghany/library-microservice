@@ -26,6 +26,8 @@ type BookServiceInterface interface {
 	UpdateBook(context.Context, *book.Book) (*book.CommonBookResponse, error)
 	DeleteBook(context.Context, *book.Book) (*book.CommonBookResponse, error)
 
+	GetRecommendation(context.Context, *book.BookRequest) (*book.BooksResponse, error)
+
 	BorrowBook(context.Context, *book.BorrowRecord) (*book.CommonBorrowRecordResponse, error)
 	ReturnBook(context.Context, *book.BorrowRecord) (*book.CommonBorrowRecordResponse, error)
 }
@@ -271,4 +273,43 @@ func (s *BookService) ReturnBook(ctx context.Context, body *book.BorrowRecord) (
 	}
 
 	return &book.CommonBorrowRecordResponse{Message: "return book successfully"}, nil
+}
+
+func (s *BookService) GetRecommendation(ctx context.Context, body *book.BookRequest) (*book.BooksResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Internal, "missing outgoing metadata")
+	}
+	outbondCtx := metadata.NewOutgoingContext(ctx, md)
+
+	_, err := s.userSvc.GetUser(outbondCtx, &emptypb.Empty{})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, "invalid user")
+	}
+
+	data, err := s.repo.MostBorrows(body.GetSearch())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	books := []*book.Book{}
+	if len(data) > 0 {
+		for _, v := range data {
+			temp := &book.Book{
+				Id:         v.ID,
+				Name:       v.Name,
+				AuthorId:   v.Name,
+				CategoryId: v.CategoryID,
+				IsBorrowed: v.IsBorrowed,
+				Borrows:    int32(v.Borrows),
+				CreatedBy:  v.CreatedBy,
+				CreatedAt:  v.CreatedAt.String(),
+				UpdatedAt:  v.UpdatedAt.String(),
+			}
+
+			books = append(books, temp)
+		}
+	}
+
+	return &book.BooksResponse{Books: books}, nil
 }

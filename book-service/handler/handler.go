@@ -83,6 +83,15 @@ func (h *BookHandler) ReturnBook(ctx context.Context, body *book.BorrowRecord) (
 	return h.s.ReturnBook(ctx, body)
 }
 
+func (h *BookHandler) GetRecommendation(ctx context.Context, body *book.BookRequest) (*book.BooksResponse, error) {
+	_, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, status.Error(codes.PermissionDenied, err.Error())
+	}
+
+	return h.s.GetRecommendation(ctx, body)
+}
+
 func getUserIDFromContext(ctx context.Context) (string, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

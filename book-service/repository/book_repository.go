@@ -22,6 +22,7 @@ type BookRepositoryInterface interface {
 	Delete(context.Context, string) error
 	Borrow(context.Context, *model.BorrowRecord) error
 	ReturnBook(context.Context, *model.BorrowRecord) error
+	MostBorrows(string) ([]*model.Book, error)
 }
 
 type BookRepository struct {
@@ -251,4 +252,18 @@ func (r *BookRepository) ReturnBook(ctx context.Context, data *model.BorrowRecor
 	}
 
 	return nil
+}
+
+func (r *BookRepository) MostBorrows(search string) ([]*model.Book, error) {
+	base := r.db.Order("borrows DESC").Limit(5)
+
+	if search != "" {
+		base.Where("name ILIKE ?", "%"+search+"%")
+	}
+	var books []*model.Book
+	if err := base.Find(&books).Error; err != nil {
+		return nil, err
+	}
+
+	return books, nil
 }
