@@ -3,13 +3,14 @@ syntax = "proto3";
 package book;
 option go_package = "go/book";
 
-
 service BookService {
   rpc Create(Book) returns (CommonBookResponse);
   rpc Get(Book) returns (Book);
   rpc Getlist(BookRequest) returns (BooksResponse);
   rpc Update(Book) returns (CommonBookResponse);
   rpc Delete(Book) returns (CommonBookResponse);
+
+  rpc GetRecommendation(BookRequest) returns (BooksResponse);
 
   rpc BorrowBook(BorrowRecord) returns (CommonBorrowRecordResponse);
   rpc ReturnBook(BorrowRecord) returns (CommonBorrowRecordResponse);
