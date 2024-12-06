@@ -5,7 +5,7 @@ go 1.23.3
 require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/joho/godotenv v1.5.1
-	gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241205181320-ad4a6cf44a81
+	gitlab.com/shafaalafghany/synapsis-proto v0.0.0-20241206001001-703dfc2710e5
 	google.golang.org/protobuf v1.35.2
 	gorm.io/gorm v1.25.12
 )
